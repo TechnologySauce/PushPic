@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PushPic - 基于 GitHub Pages 与 GitHub Contents API 的免费图床" />
+  <title>PushPic · GitHub Pages 图床</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">P</span>
+      <div>
+        <h1>PushPic</h1>
+        <p>Simple image hosting powered by GitHub Pages</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="configBadge" class="badge badge-warn">未配置</span>
+      <button id="settingsBtn" class="btn btn-ghost" type="button">设置</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card upload-card">
+      <div class="card-head">
+        <h2>上传图片</h2>
+        <span class="hint">支持拖拽 · 最多 20 张 · 单张 ≤ 10 MB</span>
+      </div>
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="选择或拖拽图片上传">
+        <div class="dropzone-icon">＋</div>
+        <p class="dropzone-title">拖拽图片到这里，或点击选择文件</p>
+        <p class="dropzone-sub">图片会直接上传到仓库的 <code>images/</code> 目录</p>
+        <input id="fileInput" type="file" accept="image/*" multiple hidden />
+      </div>
+      <div id="progressWrap" class="progress-wrap" hidden>
+        <div class="progress-bar"><div id="progressBar" class="progress-fill"></div></div>
+        <span id="progressText" class="progress-text"></span>
+      </div>
+      <p id="status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>图片库</h2>
+        <div class="gallery-actions">
+          <input id="searchInput" class="input search" type="search" placeholder="搜索文件名…" aria-label="搜索文件名" />
+          <button id="refreshBtn" class="btn btn-ghost" type="button">刷新</button>
+        </div>
+      </div>
+      <div id="gallery" class="gallery">
+        <p class="empty">首次使用请先点击右上角「设置」填写 GitHub 配置，然后上传图片。</p>
+      </div>
+      <div class="pagination" hidden id="pagination">
+        <button id="prevBtn" class="btn btn-ghost" type="button">上一页</button>
+        <span id="pageInfo"></span>
+        <button id="nextBtn" class="btn btn-ghost" type="button">下一页</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="settingsModal" class="modal" hidden>
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-head">
+        <h2 id="settingsTitle">设置</h2>
+        <button class="icon-btn" type="button" data-close="1" aria-label="关闭">×</button>
+      </div>
+      <form id="settingsForm" class="modal-body">
+        <label class="field">
+          <span>GitHub 仓库</span>
+          <input class="input" name="repo" placeholder="TechnologySauce/PushPic" required />
+          <small>格式：owner/repo</small>
+        </label>
+        <label class="field">
+          <span>分支</span>
+          <input class="input" name="branch" value="main" required />
+        </label>
+        <label class="field">
+          <span>图片目录</span>
+          <input class="input" name="dir" value="images" required />
+          <small>仓库内存放图片的目录</small>
+        </label>
+        <label class="field">
+          <span>Personal Access Token</span>
+          <input class="input" name="token" type="password" placeholder="ghp_…" autocomplete="off" />
+          <small id="tokenHint">仅保存在本浏览器 localStorage，不会上传到任何服务器。需要 repo 权限。</small>
+        </label>
+        <label class="check-field">
+          <input type="checkbox" name="customDomain" />
+          <span>使用自定义域名生成图片链接（填写 Pages 自定义域名）</span>
+        </label>
+        <label class="field">
+          <span>自定义域名</span>
+          <input class="input" name="domain" placeholder="cdn.example.com" />
+        </label>
+        <p id="settingsError" class="error" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="1">取消</button>
+          <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="previewModal" class="modal" hidden>
+    <div class="modal-backdrop" data-close-preview="1"></div>
+    <div class="modal-panel preview-panel" role="dialog" aria-modal="true" aria-label="图片预览">
+      <div class="modal-head">
+        <h2 id="previewName"></h2>
+        <button class="icon-btn" type="button" data-close-preview="1" aria-label="关闭">×</button>
+      </div>
+      <div class="preview-body"><img id="previewImg" alt="预览" /></div>
+      <div class="preview-links" id="previewLinks"></div>
+    </div>
+  </div>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>
