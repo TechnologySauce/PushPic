@@ -87,7 +87,16 @@
   function readFile(file) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
-      reader.onload = function () { resolve(String(reader.result).split(',')[1] || ''); };
+      reader.onload = function () {
+        var result = String(reader.result || '');
+        var comma = result.indexOf(',');
+        var base64 = comma === -1 ? '' : result.slice(comma + 1);
+        if (!base64) {
+          reject(new Error('读取文件失败（内容为空）: ' + file.name));
+          return;
+        }
+        resolve(base64);
+      };
       reader.onerror = function () { reject(new Error('读取文件失败: ' + file.name)); };
       reader.readAsDataURL(file);
     });
@@ -97,13 +106,20 @@
     var path = IMAGE_DIR + '/' + name;
     var contentsUrl = 'https://api.github.com/repos/' + OWNER_REPO + '/contents/' + encodePath(path);
     return readFile(file).then(function (content) {
-      // Contents API 始终要求 content（base64）；sha 仅用于更新已有文件，不能替代 content。
+      // Contents API 新建文件必须提供 base64 的 content；缺字段会得到 422 content wasn't supplied。
+      if (typeof content !== 'string' || !content.length) {
+        throw new Error('文件 ' + name + ' 未生成有效内容，已取消上传');
+      }
       var body = {
         message: 'Upload ' + name + ' via PushPic',
         branch: BRANCH,
         content: content
       };
-      return apiFetch(contentsUrl, { method: 'PUT', headers: jsonHeaders(), body: JSON.stringify(body) });
+      var payload = JSON.stringify(body);
+      if (!JSON.parse(payload).hasOwnProperty('content')) {
+        throw new Error('上传请求缺少 content 字段，已取消');
+      }
+      return apiFetch(contentsUrl, { method: 'PUT', headers: jsonHeaders(), body: payload });
     }).then(function (res) {
       return {
         name: name,
