@@ -97,19 +97,13 @@
     var path = IMAGE_DIR + '/' + name;
     var contentsUrl = 'https://api.github.com/repos/' + OWNER_REPO + '/contents/' + encodePath(path);
     return readFile(file).then(function (content) {
-      var body = { message: 'Upload ' + name + ' via PushPic', branch: BRANCH };
-      if (file.size <= 1024 * 1024) {
-        body.content = content;
-        return apiFetch(contentsUrl, { method: 'PUT', headers: jsonHeaders(), body: JSON.stringify(body) });
-      }
-      return apiFetch('https://api.github.com/repos/' + OWNER_REPO + '/git/blobs', {
-        method: 'POST',
-        headers: jsonHeaders(),
-        body: JSON.stringify({ content: content, encoding: 'base64' })
-      }).then(function (blob) {
-        body.sha = blob.sha;
-        return apiFetch(contentsUrl, { method: 'PUT', headers: jsonHeaders(), body: JSON.stringify(body) });
-      });
+      // Contents API 始终要求 content（base64）；sha 仅用于更新已有文件，不能替代 content。
+      var body = {
+        message: 'Upload ' + name + ' via PushPic',
+        branch: BRANCH,
+        content: content
+      };
+      return apiFetch(contentsUrl, { method: 'PUT', headers: jsonHeaders(), body: JSON.stringify(body) });
     }).then(function (res) {
       return {
         name: name,
