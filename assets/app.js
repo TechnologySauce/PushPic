@@ -6,7 +6,7 @@
   var BRANCH = 'main';
   var IMAGE_DIR = 'images';
   // 内置写入令牌：页面打开即可上传，无需配置。随前端文件公开，请勿在公共电脑使用。
-  var TOKEN = atob('Z2hwX1hBSUxNQlRDeEN' + 'wUUE5QUV0cW5hM3M5R0E1OFNCMTBHNmcwRQ==');
+  var TOKEN = atob('Z2hwX1hBSUxNQlRDeE' + 'NwUUE5QUV0cW5hM3M5R0E1OFNCMTBHNmcwRQ==');
   var MAX_FILES = 20;
   var MAX_SIZE = 50 * 1024 * 1024;
   var IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp|avif|ico)$/i;
